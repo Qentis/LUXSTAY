@@ -1,35 +1,49 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
     {% for unit in units %}
-    <div class="unit-card bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
-        <div class="h-64 w-full bg-gray-200 overflow-hidden">
+    <div class="unit-card group glass-card rounded-[2rem] overflow-hidden flex flex-col">
+        <div class="h-72 w-full bg-gray-100 overflow-hidden relative">
             {% if unit.property and unit.property.image %}
-                <img src="{{ url_for('static', filename='uploads/' + unit.property.image) }}" class="w-full h-full object-cover">
+                <img src="{{ url_for('static', filename='uploads/' + unit.property.image) }}" 
+                     class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
             {% else %}
-                <div class="w-full h-full flex items-center justify-center text-gray-400 font-medium">Нет фото</div>
+                <div class="w-full h-full flex items-center justify-center text-gray-400 font-medium bg-gray-100">Нет фото</div>
             {% endif %}
         </div>
 
-        <div class="p-6">
+        <div class="p-8 flex flex-col flex-grow">
             {% if unit.property %}
-                <div class="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">🏨 {{ unit.property.name }}</div>
-                <p class="text-gray-500 text-sm mb-3 truncate">{{ unit.property.address }}</p>
+                <div class="text-[11px] font-extrabold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                    {{ unit.property.name }}
+                </div>
+            {% endif %}
+            {% if unit.title == "private" %}
+                <h3 class="text-2xl font-bold text-gray-900 mb-2 leading-tight">Дом/вилла</h3>
+            {% else %}
+                <h3 class="text-2xl font-bold text-gray-900 mb-2 leading-tight">Апартаменты</h3>
+            {% endif %}
+            {% if unit.property %}
+                <p class="text-gray-500 text-sm mb-6 truncate">{{ unit.property.address }}</p>
             {% endif %}
 
-            <h3 class="text-xl font-bold text-gray-900 mb-6">{{ unit.title }}</h3>
-
-            <div class="flex justify-between items-center border-t border-gray-100 pt-5">
-                <span class="text-sm font-medium text-gray-500">{{ unit.capacity }} гостей</span>
-                <span class="text-2xl font-extrabold text-gray-900">{{ unit.price_per_night }}€</span>
+            <div class="mt-auto pt-6 border-t border-gray-200/60 flex justify-between items-end">
+                <div>
+                    <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Гостей</span>
+                    <span class="text-sm font-medium text-gray-700">{{ unit.capacity }} макс.</span>
+                </div>
+                <div class="text-right">
+                    <span class="text-3xl font-extrabold text-gray-900">{{ unit.price_per_night }}€</span>
+                    <span class="text-sm text-gray-500 font-medium">/ ночь</span>
+                </div>
             </div>
 
-            <a href="/book/{{ unit.id }}" class="block w-full text-center bg-gray-50 text-gray-900 py-4 mt-6 rounded-2xl font-bold hover:bg-gray-900 hover:text-white transition-all">
+            <a href="/book/{{ unit.id }}" class="btn-primary block w-full text-center py-4 mt-8 rounded-xl font-bold text-lg">
                 Забронировать
             </a>
         </div>
     </div>
     {% endfor %}
 </div>
-
 {% endblock %}

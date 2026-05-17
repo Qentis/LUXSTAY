@@ -1,37 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="glass-card p-10 md:p-14 rounded-[2.5rem]">
+        <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-10">Оформление брони</h3>
 
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-        <h3 class="text-3xl font-bold text-gray-900 mb-8">Бронирование</h3>
-
-            <form method="POST" class="space-y-5">
-                <div class="grid grid-cols-2 gap-4">
-                    <input name="name" required placeholder="Имя" class="...">
-                    <input name="surname" required placeholder="Фамилия" class="...">
+        <form method="POST" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <input name="name" required placeholder="Имя" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900">
+                <input name="surname" required placeholder="Фамилия" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900">
+            </div>
+            
+            <input name="contact" required placeholder="Телефон для связи" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Заезд</label>
+                    <input type="date" name="check_in" required class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 cursor-pointer">
                 </div>
-                <input name="contact" required placeholder="Телефон" class="...">
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="date" name="check_in" required class="...">
-                    <input type="date" name="check_out" required class="...">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Выезд</label>
+                    <input type="date" name="check_out" required class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 cursor-pointer">
                 </div>
-                <button type="submit" ...>Подтвердить</button>
-            </form>
+            </div>
+            
+            <button type="submit" class="btn-primary w-full py-5 rounded-2xl font-bold text-lg mt-8">
+                Подтвердить бронирование
+            </button>
+        </form>
 
-        <div class="mt-10 pt-8 border-t border-gray-100">
-            <p class="text-sm font-bold text-gray-900 mb-4">Свободные даты (30 дней):</p>
-            <ul class="flex flex-wrap gap-2">
+        <div class="mt-12 pt-10 border-t border-gray-200/60">
+            <h4 class="text-sm font-extrabold text-gray-900 uppercase tracking-wider mb-6">Свободные слоты (30 дней)</h4>
+            <ul class="flex flex-wrap gap-3">
                 {% for start, end in free_slots %}
                     <li class="date-slot">
-                        {{ start.strftime('%d.%m') }}{% if start != end %} — {{ end.strftime('%d.%m') }}{% endif %}
+                        {{ start.strftime('%d.%m') }}{% if start != end %} <span class="text-gray-300 mx-1">→</span> {{ end.strftime('%d.%m') }}{% endif %}
                     </li>
                 {% else %}
-                    <li class="text-gray-400 text-sm">Нет свободных дат.</li>
+                    <li class="text-gray-400 text-sm font-medium italic p-4 bg-gray-50 rounded-xl w-full text-center">К сожалению, на ближайшие даты мест нет.</li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 </div>
-
 {% endblock %}

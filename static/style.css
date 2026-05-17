@@ -1,0 +1,67 @@
+/* Импорт премиальной шрифтовой пары */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap');
+
+:root {
+    --primary: #0a0a0a;
+    --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+    font-family: 'Manrope', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--primary);
+    background-color: #f8f9fa;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-logo {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.02em;
+}
+
+/* Эффект матового стекла для карточек (Glassmorphism) */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,1);
+}
+
+/* Анимация карточек объектов */
+.unit-card {
+    transition: var(--transition-smooth);
+}
+.unit-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08);
+}
+
+
+
+
+.btn-primary {
+    transition: var(--transition-smooth);
+    background: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 15px 30px -10px rgba(0,0,0,0.3);
+}
+
+.date-slot {
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    transition: var(--transition-smooth);
+    cursor: default;
+}
+.date-slot:hover {
+    border-color: var(--primary);
+    background: #fff;
+    transform: translateY(-2px);
+}

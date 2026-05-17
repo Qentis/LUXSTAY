@@ -1,37 +1,70 @@
 {% extends "base.html" %}
 {% block content %}
-<h2 class="text-3xl font-bold mb-8">Мои объекты</h2>
-<div class="space-y-6">
-    {% for prop in properties %}
-    <div class="bg-white p-6 rounded-2xl border border-gray-100">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h3 class="text-xl font-bold">{{ prop.name }}</h3>
-                <form method="POST" class="flex items-center gap-3">
-                         <input type="hidden" name="property_id" value="{{ prop.id }}">
-                              <button
-                                type="submit"
-                                class="px-5 py-2.5 rounded-full text-sm font-semibold text-red-600 hover:bg-red-50 transition-all duration-200"
-                                name="butto"
-                                value="delete"
-                            >
-                                Удалить
-                            </button>
-</form>
-        </div>
+<div class="mb-10 flex justify-between items-end">
+    <h2 class="text-4xl font-bold text-gray-900">Управление объектами</h2>
+</div>
 
-         <p class="text-gray-500 text-sm mb-4">{{ prop.address }}</p>
+<div class="space-y-8">
+    {% for prop in properties %}
+    <div class="glass-card p-8 md:p-10 rounded-[2rem] relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+            <div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ prop.name }}</h3>
+                <p class="text-gray-500 text-sm flex items-center gap-2">
+                    📍 {{ prop.address }}
+                </p>
+            </div>
+            
+            <form method="POST" class="shrink-0">
+                <input type="hidden" name="property_id" value="{{ prop.id }}">
+                <button type="submit" name="butto" value="delete" class="px-6 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                    Удалить объект
+                </button>
+            </form>
+        </div>
         
-        <h4 class="font-bold text-sm text-gray-900 mb-2">Бронирования:</h4>
-        <div class="bg-gray-50 p-4 rounded-xl">
-            {% for unit in prop.units %}        
-                {% for b in unit.bookings %}
-                    <div class="text-sm py-1 border-b last:border-0 border-gray-200">
-                        {{ b.check_in }} — {{ b.check_out }}
-                        <br><br> Гость: {{ b.guest.name }} {{ b.guest.surname }}
-                        <br><br> Номер: {{ b.guest.contact }}
+        <h4 class="text-xs font-extrabold text-gray-500 uppercase tracking-widest mb-4">Актуальные бронирования</h4>
+        
+        {% set ns = namespace(has_bookings=false) %}
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    {% for unit in prop.units %}
+        {% for b in unit.bookings %}
+            {% set ns.has_bookings = true %}
+
+            <div class="bg-white/60 border border-gray-100 p-5 rounded-2xl hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm">
+                        {{ b.guest.name[0] }}{{ b.guest.surname[0] }}
                     </div>
-                {% endfor %}
-            {% endfor %}
+
+                    <div>
+                        <div class="font-bold text-gray-900">
+                            {{ b.guest.name }} {{ b.guest.surname }}
+                        </div>
+
+                        <div class="text-xs text-gray-500">
+                            {{ b.guest.contact }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center text-sm font-medium">
+                    <span class="text-gray-500">Даты:</span>
+                    <span class="text-gray-900">
+                        {{ b.check_in }} — {{ b.check_out }}
+                    </span>
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {% if not ns.has_bookings %}
+        <div class="col-span-full py-8 text-center bg-white/40 border border-dashed border-gray-200 rounded-2xl text-gray-400 text-sm font-medium">
+            Пока нет бронирований
+        </div>
+    {% endif %}
+</div>
         </div>
     </div>
     {% endfor %}

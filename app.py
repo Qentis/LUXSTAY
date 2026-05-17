@@ -24,10 +24,14 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 blueprint = make_google_blueprint(
     client_id=os.environ.get("GOOGLE_CLIENT_ID"),
     client_secret=os.environ.get("GOOGLE_CLIENT_SECRET"),
-    scope=["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"],
-    offline=True
+    scope=[
+        "openid", 
+        "https://www.googleapis.com/auth/userinfo.email", 
+        "https://www.googleapis.com/auth/userinfo.profile"
+    ],
+    offline=True,
+    reprompt_consent=True
 )
-
 app.register_blueprint(blueprint, url_prefix="/login")
 
 UPLOAD_FOLDER = "static/uploads"
@@ -44,9 +48,45 @@ def login_required(f):
 
 @app.route("/")
 def index():
+    search_query = request.args.get("search", "").strip()
+    min_price = request.args.get("min_price", type=int)
+    max_price = request.args.get("max_price", type=int)
+    capacity = request.args.get("capacity", type=int)
+
     with SessionLocal() as session:
-        units = session.query(Unit).options(joinedload(Unit.property)).all()
-    return render_template("index.html", units=units)
+        query = session.query(Unit).options(joinedload(Unit.property))
+        
+        if search_query:
+            query = query.join(Unit.property).filter(
+                or_(
+                    Unit.title.ilike(f"%{search_query}%"),
+                    Property.name.ilike(f"%{search_query}%"),
+                    Property.address.ilike(f"%{search_query}%")
+                )
+            )
+            
+
+        if min_price is not None:
+            query = query.filter(Unit.price_per_night >= min_price)
+            
+
+        if max_price is not None:
+            query = query.filter(Unit.price_per_night <= max_price)
+            
+
+        if capacity is not None:
+            query = query.filter(Unit.capacity >= capacity)
+
+        units = query.all()
+
+    return render_template(
+        "index.html", 
+        units=units,
+        search=search_query,
+        min_price=min_price if min_price is not None else "",
+        max_price=max_price if max_price is not None else "",
+        capacity=capacity if capacity is not None else ""
+    )
 
 @app.route("/dashboard", methods=["GET", "POST"])
 @login_required

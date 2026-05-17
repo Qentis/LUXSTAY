@@ -1,28 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
+<div class="max-w-2xl mx-auto glass-card p-10 md:p-14 rounded-[2.5rem]">
+    <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900 mb-3">Новый объект</h2>
+        <p class="text-gray-500 text-sm">Заполните данные для размещения на платформе</p>
+    </div>
 
-<div class="max-w-xl mx-auto bg-white p-10 rounded-3xl shadow-sm border border-gray-100">
-    <h3 class="text-2xl font-bold mb-8">Добавить объект</h3>
-
-    <form method="POST" enctype="multipart/form-data" class="space-y-4">
-        <input name="name" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100" placeholder="Название объекта">
-        <input name="address" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100" placeholder="Адрес">
-        <textarea name="description" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100" placeholder="Описание" rows="3"></textarea>
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        <div>
+            <input name="name" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" placeholder="Название объекта (напр. Villa Rosa)">
+        </div>
         
-        <div class="grid grid-cols-2 gap-4">
-            <input name="price" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100" placeholder="Цена за ночь">
-            <input name="capacity" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100" placeholder="Кол-во гостей">
+        <div>
+            <input name="address" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" placeholder="Полный адрес">
+        </div>
+        
+        <div>
+            <textarea name="description" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 resize-none" placeholder="Увлекательное описание..." rows="4"></textarea>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <input name="price" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" placeholder="Цена за ночь (€)">
+            <input name="capacity" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" placeholder="Кол-во гостей">
         </div>
 
-        <select name="type" class="w-full p-4 bg-gray-50 rounded-2xl border border-gray-100">
-            <option value="apartment">Апартаменты</option>
-            <option value="private">Дом</option>
-        </select>
+        <div>
+            <select name="type" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 appearance-none cursor-pointer">
+                <option value="apartment">Апартаменты</option>
+                <option value="private">Дом / Вилла</option>
+            </select>
+        </div>
 
-        <input type="file" name="image" class="w-full p-3 bg-gray-50 rounded-2xl border border-dashed border-gray-300 text-sm">
+        <div class="relative">
+            <input type="file" name="image" class="w-full p-4 bg-white/50 rounded-2xl border-2 border-dashed border-gray-300 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-900 file:text-white hover:file:bg-gray-800 cursor-pointer transition-all">
+        </div>
 
-        <button class="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition-all mt-4">Создать объект</button>
+        <button class="btn-primary w-full py-5 rounded-2xl font-bold text-lg mt-8">
+            Опубликовать объект
+        </button>
     </form>
 </div>
-
 {% endblock %}
