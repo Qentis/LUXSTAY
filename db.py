@@ -187,7 +187,7 @@ def get_free_slots(bookings, days_ahead=30):
         free_slots.append((current_date, end_date))
     return free_slots
 
-def delete(id_property):
+def delete_property(id_property):
     with SessionLocal() as session:
         property = session.query(Property).filter_by(id=id_property).first()
         unit = session.query(Unit).filter_by(property_id=id_property).first()
@@ -197,6 +197,12 @@ def delete(id_property):
             image = property.image
             os.remove(f"static/uploads/{image}")
             session.delete(property)
+        session.commit()
+
+def delete_booking(id):
+    with SessionLocal() as session:
+        booking = session.query(Booking).filter_by(id=id).first()
+        session.delete(booking)
         session.commit()
 
 

@@ -27,15 +27,16 @@
         
         {% set ns = namespace(has_bookings=false) %}
 
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-9999">
     {% for unit in prop.units %}
         {% for b in unit.bookings %}
             {% set ns.has_bookings = true %}
 
             <div class="bg-white/60 border border-gray-100 p-5 rounded-2xl hover:shadow-md transition-shadow">
                 <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                    <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm">
+                    <div class="w-10 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm">
                         {{ b.guest.name[0] }}{{ b.guest.surname[0] }}
+                        
                     </div>
 
                     <div>
@@ -47,6 +48,12 @@
                             {{ b.guest.contact }}
                         </div>
                     </div>
+                    <form method="POST" class="shrink-0">
+                <input type="hidden" name="id_booking" value="{{ b.id }}">
+                <button type="submit" name="butto" value="delete" class="px-6 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                    Удалить гостя
+                </button>
+            </form>
                 </div>
 
                 <div class="flex justify-between items-center text-sm font-medium">

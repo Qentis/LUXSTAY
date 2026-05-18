@@ -9,7 +9,7 @@ from functools import wraps
 from dotenv import load_dotenv
 from db import (
     SessionLocal, Unit, Property, Guest,
-    add_property, add_guest, add_booking, add_unit, get_free_slots, delete
+    add_property, add_guest, add_booking, add_unit, get_free_slots, delete_property, delete_booking
 )
 
 os.environ["NO_PROXY"] = "127.0.0.1,localhost"
@@ -92,8 +92,12 @@ def index():
 @login_required
 def dashboard():
     if request.method == "POST":
-        property_id = request.form.get("property_id")
-        delete(property_id)
+        if request.form.get("property_id") == None:
+            id = request.form.get("id_booking")
+            delete_booking(id)
+        else:
+            delete_property(request.form.get("property_id"))
+
     user_info = google.get("/oauth2/v2/userinfo").json()
     email = user_info["email"]
     with SessionLocal() as session:
