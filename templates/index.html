@@ -1,49 +1,101 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-    {% for unit in units %}
-    <div class="unit-card group glass-card rounded-[2rem] overflow-hidden flex flex-col">
-        <div class="h-72 w-full bg-gray-100 overflow-hidden relative">
-            {% if unit.property and unit.property.image %}
-                <img src="{{ url_for('static', filename='uploads/' + unit.property.image) }}" 
-                     class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
-            {% else %}
-                <div class="w-full h-full flex items-center justify-center text-gray-400 font-medium bg-gray-100">Нет фото</div>
-            {% endif %}
-        </div>
-
-        <div class="p-8 flex flex-col flex-grow">
-            {% if unit.property %}
-                <div class="text-[11px] font-extrabold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-                    {{ unit.property.name }}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-12">
+        <form method="GET" action="/" class="glass-card p-6 rounded-[2rem] shadow-sm border border-gray-100">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="flex flex-col">
+                    <label for="search" class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 ml-1">Поиск</label>
+                    <input type="text" name="search" id="search" value="{{ search }}" 
+                           placeholder="Город, отель или адрес..." 
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
                 </div>
-            {% endif %}
-            {% if unit.title == "private" %}
-                <h3 class="text-2xl font-bold text-gray-900 mb-2 leading-tight">Дом/вилла</h3>
-            {% else %}
-                <h3 class="text-2xl font-bold text-gray-900 mb-2 leading-tight">Апартаменты</h3>
-            {% endif %}
-            {% if unit.property %}
-                <p class="text-gray-500 text-sm mb-6 truncate">{{ unit.property.address }}</p>
-            {% endif %}
-
-            <div class="mt-auto pt-6 border-t border-gray-200/60 flex justify-between items-end">
-                <div>
-                    <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Гостей</span>
-                    <span class="text-sm font-medium text-gray-700">{{ unit.capacity }} макс.</span>
+                <div class="flex flex-col">
+                    <label for="min_price" class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 ml-1">Мин. цена (€)</label>
+                    <input type="number" name="min_price" id="min_price" value="{{ min_price }}" 
+                           placeholder="0" 
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
                 </div>
-                <div class="text-right">
-                    <span class="text-3xl font-extrabold text-gray-900">{{ unit.price_per_night }}€</span>
-                    <span class="text-sm text-gray-500 font-medium">/ ночь</span>
+                <div class="flex flex-col">
+                    <label for="max_price" class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 ml-1">Макс. цена (€)</label>
+                    <input type="number" name="max_price" id="max_price" value="{{ max_price }}" 
+                           placeholder="10000" 
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                </div>
+                <div class="flex flex-col">
+                    <label for="capacity" class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2 ml-1">Гостей</label>
+                    <input type="number" name="capacity" id="capacity" value="{{ capacity }}" 
+                           placeholder="Кол-во человек" 
+                           class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
                 </div>
             </div>
-
-            <a href="/book/{{ unit.id }}" class="btn-primary block w-full text-center py-4 mt-8 rounded-xl font-bold text-lg">
-                Забронировать
-            </a>
-        </div>
+            <div class="mt-6 flex flex-wrap gap-4 items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    Найдено вариантов: <span class="font-bold text-gray-900">{{ units|length }}</span>
+                </div>
+                <div class="flex gap-3">
+                    <a href="/" class="px-6 py-3 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition-colors">
+                        Сбросить
+                    </a>
+                    <button type="submit" class="btn-primary px-8 py-3 rounded-xl font-bold text-white shadow-lg transition-transform active:scale-95">
+                        Применить фильтры
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
-    {% endfor %}
+    {% if units %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        {% for unit in units %}
+        <div class="unit-card group glass-card rounded-[2rem] overflow-hidden flex flex-col">
+            <div class="h-72 w-full bg-gray-100 overflow-hidden relative">
+                {% if unit.property and unit.property.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + unit.property.image) }}" 
+                         class="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400 font-medium bg-gray-100">Нет фото</div>
+                {% endif %}
+            </div>
+
+            <div class="p-8 flex flex-col flex-grow">
+                {% if unit.property %}
+                    <div class="text-[11px] font-extrabold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                        {{ unit.property.name }}
+                    </div>
+                {% endif %}
+                
+                <h3 class="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+                    {% if unit.title == "private" %} Дом/вилла {% else %} Апартаменты {% endif %}
+                </h3>
+
+                {% if unit.property %}
+                    <p class="text-gray-500 text-sm mb-6 truncate">{{ unit.property.address }}</p>
+                {% endif %}
+
+                <div class="mt-auto pt-6 border-t border-gray-200/60 flex justify-between items-end">
+                    <div>
+                        <span class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Гостей</span>
+                        <span class="text-sm font-medium text-gray-700">{{ unit.capacity }} макс.</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-3xl font-extrabold text-gray-900">{{ unit.price_per_night }}€</span>
+                        <span class="text-sm text-gray-500 font-medium">/ ночь</span>
+                    </div>
+                </div>
+
+                <a href="/book/{{ unit.id }}" class="btn-primary block w-full text-center py-4 mt-8 rounded-xl font-bold text-lg hover:opacity-90 transition-opacity">
+                    Забронировать
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20">
+        <h2 class="text-2xl font-bold text-gray-400">Ничего не найдено по вашему запросу</h2>
+        <a href="/" class="text-blue-500 font-semibold mt-4 inline-block hover:underline">Показать все варианты</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
