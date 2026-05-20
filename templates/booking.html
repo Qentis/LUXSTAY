@@ -1,45 +1,147 @@
 {% extends "base.html" %}
 {% block content %}
+<!-- Стили и скрипты Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+
 <div class="max-w-3xl mx-auto">
-    <div class="glass-card p-10 md:p-14 rounded-[2.5rem]">
+    <div class="glass-card p-10 md:p-14 rounded-[2.5rem] bg-white shadow-xl">
         <h3 class="text-3xl md:text-4xl font-bold text-gray-900 mb-10">Оформление брони</h3>
 
-        <form method="POST" class="space-y-6">
+        <form method="POST" id="bookingForm" class="space-y-6" novalidate>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <input type="" name="name" oninput="this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '')" required minlength="3" required placeholder="Имя" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900">
-                <input type="text" oninput="this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '')" name="surname" required placeholder="Фамилия" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900">
+                <div class="flex flex-col">
+                    <input type="text" name="name" id="name" oninput="this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '')" placeholder="Имя" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    <span class="text-red-500 text-xs mt-1 ml-2 hidden" id="error-name">Введите имя</span>
+                </div>
+                <div class="flex flex-col">
+                    <input type="text" name="surname" id="surname" oninput="this.value = this.value.replace(/[^a-zA-Zа-яА-ЯёЁ]/g, '')" placeholder="Фамилия" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    <span class="text-red-500 text-xs mt-1 ml-2 hidden" id="error-surname">Введите фамилию</span>
+                </div>
             </div>
             
-            <input type="number" name="contact" required minlength="3" required placeholder="Телефон для связи" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900">
+            <div class="flex flex-col">
+                <input type="tel" name="contact" id="contact" placeholder="Телефон для связи" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                <span class="text-red-500 text-xs mt-1 ml-2 hidden" id="error-contact">Введите номер телефона</span>
+            </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                <div>
+                <div class="flex flex-col">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Заезд</label>
-                    <input type="date" name="check_in" required class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 cursor-pointer">
+                    <input type="text" id="check_in" name="check_in" readonly placeholder="Выберите дату" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 cursor-pointer bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <span class="text-red-500 text-xs mt-1 ml-2 hidden" id="error-check_in">Выберите дату заезда</span>
                 </div>
-                <div>
+                <div class="flex flex-col">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Выезд</label>
-                    <input type="date" name="check_out" required class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 cursor-pointer">
+                    <input type="text" id="check_out" name="check_out" readonly placeholder="Выберите дату" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 cursor-pointer bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                    <span class="text-red-500 text-xs mt-1 ml-2 hidden" id="error-check_out">Выберите дату выезда</span>
                 </div>
             </div>
             
-            <button type="submit" class="btn-primary w-full py-5 rounded-2xl font-bold text-lg mt-8">
+            <button type="submit" class="w-full py-5 rounded-2xl font-bold text-lg mt-8 bg-black text-white hover:bg-gray-800 transition-all active:scale-[0.98]">
                 Подтвердить бронирование
             </button>
         </form>
 
+        <!-- Свободные слоты -->
         <div class="mt-12 pt-10 border-t border-gray-200/60">
-            <h4 class="text-sm font-extrabold text-gray-900 uppercase tracking-wider mb-6">Свободные слоты (30 дней)</h4>
+            <h4 class="text-sm font-extrabold text-gray-900 uppercase tracking-wider mb-6">Доступные даты</h4>
             <ul class="flex flex-wrap gap-3">
                 {% for start, end in free_slots %}
-                    <li class="date-slot">
-                        {{ start.strftime('%d.%m') }}{% if start != end %} <span class="text-gray-300 mx-1">→</span> {{ end.strftime('%d.%m') }}{% endif %}
+                    <li class="px-3 py-1 bg-green-50 text-green-700 rounded-lg border border-green-100 text-xs font-medium">
+                        {{ start.strftime('%d.%m') }}{% if start != end %} <span class="mx-1">→</span> {{ end.strftime('%d.%m') }}{% endif %}
                     </li>
-                {% else %}
-                    <li class="text-gray-400 text-sm font-medium italic p-4 bg-gray-50 rounded-xl w-full text-center">К сожалению, на ближайшие даты мест нет.</li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bookedDates = {{ booked_dates | tojson | safe if booked_dates else '[]' }};
+
+    const checkinPicker = flatpickr("#check_in", {
+        locale: "ru",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: bookedDates,
+        onChange: function(selectedDates, dateStr) {
+            hideError('check_in');
+            const minOut = new Date(selectedDates[0]);
+            minOut.setDate(minOut.getDate() + 1);
+            checkoutPicker.set('minDate', minOut);
+
+            let nextBookedDate = null;
+            const selectedTime = selectedDates[0].getTime();
+            const sortedBooked = bookedDates.map(d => new Date(d).getTime()).sort((a, b) => a - b);
+            
+            for (let time of sortedBooked) {
+                if (time >= selectedTime) {
+                    nextBookedDate = new Date(time);
+                    break;
+                }
+            }
+            checkoutPicker.set('maxDate', nextBookedDate);
+            setTimeout(() => checkoutPicker.open(), 100);
+        }
+    });
+
+    const checkoutPicker = flatpickr("#check_out", {
+        locale: "ru",
+        dateFormat: "Y-m-d",
+        minDate: "today",
+        disable: bookedDates,
+        onChange: () => hideError('check_out')
+    });
+
+    const form = document.getElementById('bookingForm');
+    
+    function showError(id) {
+        const input = document.getElementById(id);
+        const error = document.getElementById('error-' + id);
+        input.classList.add('border-red-500', 'bg-red-50');
+        error.classList.remove('hidden');
+    }
+
+    function hideError(id) {
+        const input = document.getElementById(id);
+        const error = document.getElementById('error-' + id);
+        input.classList.remove('border-red-500', 'bg-red-50');
+        error.classList.add('hidden');
+    }
+
+    ['name', 'surname', 'contact'].forEach(id => {
+        document.getElementById(id).addEventListener('input', () => hideError(id));
+    });
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        const fields = [
+            { id: 'name', min: 2 },
+            { id: 'surname', min: 1 },
+            { id: 'contact', min: 5 },
+            { id: 'check_in', min: 1 },
+            { id: 'check_out', min: 1 }
+        ];
+
+        fields.forEach(field => {
+            const el = document.getElementById(field.id);
+            if (el.value.length < field.min) {
+                showError(field.id);
+                isValid = false;
+            } else {
+                hideError(field.id);
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            const firstError = document.querySelector('.border-red-500');
+            if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+});
+</script>
 {% endblock %}
