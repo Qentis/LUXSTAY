@@ -1,56 +1,157 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="max-w-2xl mx-auto glass-card p-10 md:p-14 rounded-[2.5rem]">
+<div class="max-w-2xl mx-auto glass-card p-10 md:p-14 rounded-[2.5rem] bg-white shadow-xl">
     <div class="text-center mb-10">
         <h2 class="text-3xl font-bold text-gray-900 mb-3">Новый объект</h2>
         <p class="text-gray-500 text-sm">Заполните данные для размещения на платформе</p>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+    <form method="POST" id="unitForm" enctype="multipart/form-data" class="space-y-6" novalidate>
+        <!-- Название -->
         <div>
-            <input type="text" name="name" required minlength="3" maxlength="100" 
-                   class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" 
-                   placeholder="Название объекта (напр. Villa Rosa)">
+            <input type="text" name="name" id="name" placeholder="Название объекта (напр. Villa Rosa)"
+                   class="w-full p-4 rounded-2xl border border-black-200 text-gray-900 focus:ring-blue-500 focus:ring-2 outline-none transition-all">
+            <p id="err-name" class="text-red-500 text-xs mt-1 ml-2 hidden">Название должно быть не менее 3 символов</p>
         </div>
         
+        <!-- Адрес -->
         <div>
-            <input type="text" name="address" required minlength="5" maxlength="200"
-                   class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" 
-                   placeholder="Полный адрес">
+            <input type="text" name="address" id="address" placeholder="Полный адрес"
+                   class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+            <p id="err-address" class="text-red-500 text-xs mt-1 ml-2 hidden">Введите корректный адрес</p>
         </div>
         
+        <!-- Описание -->
         <div>
-            <textarea name="description" required minlength="10" 
-                      class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 resize-none" 
-                      placeholder="Увлекательное описание..." rows="4"></textarea>
+            <textarea name="description" id="description" rows="4" placeholder="Увлекательное описание..." 
+                      class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 resize-none focus:ring-2 focus:ring-blue-500 outline-none transition-all"></textarea>
+            <p id="err-description" class="text-red-500 text-xs mt-1 ml-2 hidden">Описание должно быть содержательным (минимум 4 символа)</p>
         </div>
         
+        <!-- Цена и Гости -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <input type="number" name="price" required min="1" 
-                   class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" 
-                   placeholder="Цена за ночь (€)">
+            <div>
+                <input type="number" name="price" id="price" placeholder="Цена за ночь (€)"
+                       class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                <p id="err-price" class="text-red-500 text-xs mt-1 ml-2 hidden">Укажите цену (минимум 1€)</p>
+            </div>
                    
-            <input type="number" name="capacity" required min="1" max="50" 
-                   class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900" 
-                   placeholder="Кол-во гостей">
+            <div>
+                <input type="number" name="capacity" id="capacity" placeholder="Кол-во гостей"
+                       class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                <p id="err-capacity" class="text-red-500 text-xs mt-1 ml-2 hidden">От 1 до 50 гостей</p>
+            </div>
         </div>
 
+        <!-- Тип объекта -->
         <div>
-            <select name="type" required class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 appearance-none cursor-pointer">
+            <select name="type" id="type" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                 <option value="" disabled selected>Выберите тип объекта</option>
                 <option value="apartment">Апартаменты</option>
                 <option value="private">Дом / Вилла</option>
             </select>
+            <p id="err-type" class="text-red-500 text-xs mt-1 ml-2 hidden">Выберите тип жилья</p>
         </div>
 
+        <!-- Фотография -->
         <div class="relative">
-            <input type="file" name="image" required accept="image/png, image/jpeg, image/jpg, image/webp" 
+            <input type="file" name="image" id="image" accept="image/png, image/jpeg, image/jpg, image/webp" 
                    class="w-full p-4 bg-white/50 rounded-2xl border-2 border-dashed border-gray-300 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-900 file:text-white hover:file:bg-gray-800 cursor-pointer transition-all">
+            <p id="err-image" class="text-red-500 text-xs mt-1 ml-2 hidden">Загрузите фото</p>
         </div>
 
-        <button type="submit" class="btn-primary w-full py-5 rounded-2xl font-bold text-lg mt-8">
+        <button type="submit" class="btn-primary w-full py-5 rounded-2xl font-bold text-lg mt-8 bg-black-600 text-white hover:bg-black-700 transition active:scale-[0.98]">
             Опубликовать объект
         </button>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('unitForm');
+
+    // Функция показа ошибки
+    function showError(id) {
+        const input = document.getElementById(id);
+        const errorText = document.getElementById('err-' + id);
+        input.classList.add('border-red-500', 'bg-red-50');
+        errorText.classList.remove('hidden');
+    }
+
+    // Функция скрытия ошибки
+    function hideError(id) {
+        const input = document.getElementById(id);
+        const errorText = document.getElementById('err-' + id);
+        input.classList.remove('border-red-500', 'bg-red-50');
+        errorText.classList.add('hidden');
+    }
+
+    // Живая валидация (убираем ошибку при вводе)
+    const allInputs = ['name', 'address', 'description', 'price', 'capacity', 'type', 'image'];
+    allInputs.forEach(id => {
+        const el = document.getElementById(id);
+        const eventType = (el.tagName === 'SELECT' || el.type === 'file') ? 'change' : 'input';
+        
+        el.addEventListener(eventType, () => hideError(id));
+    });
+
+    // Валидация при отправке
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        // 1. Проверка Названия (min 3)
+        if (document.getElementById('name').value.trim().length < 3) {
+            showError('name');
+            isValid = false;
+        }
+
+        // 2. Проверка Адреса (min 5)
+        if (document.getElementById('address').value.trim().length < 5) {
+            showError('address');
+            isValid = false;
+        }
+
+        // 3. Проверка Описания (min 10)
+        if (document.getElementById('description').value.trim().length < 10) {
+            showError('description');
+            isValid = false;
+        }
+
+        // 4. Проверка Цены
+        const price = parseFloat(document.getElementById('price').value);
+        if (isNaN(price) || price < 1) {
+            showError('price');
+            isValid = false;
+        }
+
+        // 5. Проверка Вместимости
+        const capacity = parseInt(document.getElementById('capacity').value);
+        if (isNaN(capacity) || capacity < 1 || capacity > 50) {
+            showError('capacity');
+            isValid = false;
+        }
+
+        // 6. Проверка Типа
+        if (document.getElementById('type').value === "") {
+            showError('type');
+            isValid = false;
+        }
+
+        // 7. Проверка Файла
+        if (document.getElementById('image').files.length === 0) {
+            showError('image');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault(); // Остановить отправку
+            // Скролл к первой ошибке
+            const firstError = document.querySelector('.border-red-500');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
