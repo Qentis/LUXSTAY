@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-[60vh] flex items-center justify-center">
+    <div class="glass-card p-12 md:p-20 rounded-[3rem] text-center max-w-2xl shadow-2xl border border-white/20">
+        <div class="relative inline-block mb-8">
+            <h1 class="text-[120px] font-extrabold leading-none tracking-tighter text-gray-900 opacity-10">
+                404
+            </h1>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-4xl font-black text-gray-900 uppercase tracking-[0.2em]">Упс!</span>
+            </div>
+        </div>
+
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Страница не найдена</h2>
+        <p class="text-gray-500 text-lg mb-10 leading-relaxed">
+            Похоже, адрес был изменен или страница, которую вы ищете, больше не существует. 
+            Давайте вернемся к поиску идеального жилья.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/" class="btn-primary px-10 py-4 rounded-2xl font-bold text-lg shadow-xl hover:scale-105 transition-transform">
+                На главную
+            </a>
+            <button onclick="history.back()" class="px-10 py-4 rounded-2xl font-bold text-lg text-gray-600 hover:bg-gray-100 transition-all">
+                Назад
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+</style>
+{% endblock %}

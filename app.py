@@ -58,7 +58,7 @@ def index():
         
         if search_query:
             query = query.join(Unit.property).filter(
-                or_(
+                (
                     Unit.title.ilike(f"%{search_query}%"),
                     Property.name.ilike(f"%{search_query}%"),
                     Property.address.ilike(f"%{search_query}%")
@@ -203,6 +203,10 @@ def add_property_page():
 def logout():
     session.clear() 
     return redirect(url_for("index"))
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template("404.html")
 
 
 if __name__ == "__main__":
