@@ -1,12 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
+
+<div class="mb-16">
+    <h2 class="text-3xl font-bold text-gray-900 mb-8">Мои бронирования</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for trip in my_trips %}
+        <div class="glass-card p-6 rounded-3xl bg-white shadow-sm border border-gray-100">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h4 class="font-bold text-lg text-gray-900">{{ trip.unit.property.name }}</h4>
+                    <p class="text-xs text-gray-500">📍 {{ trip.unit.property.address }}</p>
+                </div>
+                <form method="POST" onsubmit="return confirm('Отменить ваше бронирование?')">
+                    <input type="hidden" name="id_booking" value="{{ trip.id }}">
+                    <button type="submit" class="px-6 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all shadow-sm">Отменить</button>
+                </form>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl justify-between">
+                <span>{{ trip.check_in }}</span>
+                <span class="text-gray-300">→</span>
+                <span>{{ trip.check_out }}</span>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full py-10 text-center border-2 border-dashed border-gray-100 rounded-[2rem] text-gray-400">
+            У вас пока нет забронированных поездок.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<hr class="border-gray-100 mb-16">
+
 <div class="mb-10 flex justify-between items-end">
-    <h2 class="text-4xl font-bold text-gray-900">Управление объектами</h2>
+    <h2 class="text-3xl font-bold text-gray-900">Мои объекты</h2>
 </div>
 
 <div class="space-y-8">
     {% for prop in properties %}
-    <div class="glass-card p-8 md:p-10 rounded-[2rem] relative overflow-hidden">
+    <div class="glass-card p-8 md:p-10 rounded-[2rem] relative overflow-hidden bg-white shadow-lg border border-gray-100">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
             <div>
                 <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ prop.name }}</h3>
@@ -15,63 +48,49 @@
                 </p>
             </div>
             
-            <form method="POST" class="shrink-0">
+            <form method="POST" class="shrink-0" onsubmit="return confirm('Удалить объект?')">
                 <input type="hidden" name="property_id" value="{{ prop.id }}">
-                <button type="submit" name="butto" value="delete" class="px-6 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                <button type="submit" class="px-6 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all shadow-sm">
                     Удалить объект
                 </button>
             </form>
         </div>
         
-        <h4 class="text-xs font-extrabold text-gray-500 uppercase tracking-widest mb-4">Актуальные бронирования</h4>
+        <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-4">Актуальные бронирования гостей</h4>
         
-        {% set ns = namespace(has_bookings=false) %}
-
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-9999">
-    {% for unit in prop.units %}
-        {% for b in unit.bookings %}
-            {% set ns.has_bookings = true %}
-
-            <div class="bg-white/60 border border-gray-100 p-5 rounded-2xl hover:shadow-md transition-shadow">
-                <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
-                    <div class="w-10 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm">
-                        {{ b.guest.name[0] }}{{ b.guest.surname[0] }}
-                        
-                    </div>
-
-                    <div>
-                        <div class="font-bold text-gray-900">
-                            {{ b.guest.name }} {{ b.guest.surname }}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {% set ns = namespace(has_bookings=false) %}
+            {% for unit in prop.units %}
+                {% for b in unit.bookings %}
+                    {% set ns.has_bookings = true %}
+                    <div class="bg-gray-50/50 border border-gray-100 p-5 rounded-2xl">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center font-bold text-sm">
+                                {{ b.guest.name[0] }}{{ b.guest.surname[0] }}
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900">{{ b.guest.name }} {{ b.guest.surname }}</div>
+                                <div class="text-[10px] text-gray-500">{{ b.guest.contact }}</div>
+                            </div>
                         </div>
-
-                        <div class="text-xs text-gray-500">
-                            {{ b.guest.contact }}
+                        <div class="text-xs text-gray-600 mb-4">
+                            Даты: <b>{{ b.check_in }} — {{ b.check_out }}</b>
                         </div>
+                        <form method="POST">
+                            <input type="hidden" name="id_booking" value="{{ b.id }}">
+                            <button type="submit" class="w-full py-2 rounded-lg text-xs font-bold text-red-500 bg-white border border-red-100 hover:bg-red-50 transition-all">
+                                Удалить гостя
+                            </button>
+                        </form>
                     </div>
-                    <form method="POST" class="shrink-0">
-                <input type="hidden" name="id_booking" value="{{ b.id }}">
-                <button type="submit" name="butto" value="delete" class="px-6 py-3 rounded-xl text-sm font-bold text-red-500 bg-red-50 hover:bg-red-500 hover:text-white transition-all shadow-sm">
-                    Удалить гостя
-                </button>
-            </form>
-                </div>
+                {% endfor %}
+            {% endfor %}
 
-                <div class="flex justify-between items-center text-sm font-medium">
-                    <span class="text-gray-500">Даты:</span>
-                    <span class="text-gray-900">
-                        {{ b.check_in }} — {{ b.check_out }}
-                    </span>
+            {% if not ns.has_bookings %}
+                <div class="col-span-full py-8 text-center bg-gray-50/30 border border-dashed border-gray-200 rounded-2xl text-gray-400 text-sm">
+                    Пока нет бронирований
                 </div>
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-    {% if not ns.has_bookings %}
-        <div class="col-span-full py-8 text-center bg-white/40 border border-dashed border-gray-200 rounded-2xl text-gray-400 text-sm font-medium">
-            Пока нет бронирований
-        </div>
-    {% endif %}
-</div>
+            {% endif %}
         </div>
     </div>
     {% endfor %}

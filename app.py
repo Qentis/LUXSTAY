@@ -4,11 +4,12 @@ from sqlalchemy.orm import joinedload
 from werkzeug.utils import secure_filename
 from datetime import datetime
 from PIL import Image
+from sqlalchemy import or_
 import os
 from functools import wraps
 from dotenv import load_dotenv
 from db import (
-    SessionLocal, Unit, Property, Guest,
+    SessionLocal, Unit, Property, Guest, Booking,
     add_property, add_guest, add_booking, add_unit, get_free_slots, delete_property, delete_booking
 )
 
@@ -55,15 +56,14 @@ def index():
 
     with SessionLocal() as session:
         query = session.query(Unit).options(joinedload(Unit.property))
-        
         if search_query:
-            query = query.join(Unit.property).filter(
-                (
-                    Unit.title.ilike(f"%{search_query}%"),
-                    Property.name.ilike(f"%{search_query}%"),
-                    Property.address.ilike(f"%{search_query}%")
-                )
-            )
+            search_pattern = f"%{search_query}%"
+            conditions = [
+                Unit.title.ilike(search_pattern),
+                Property.name.ilike(search_pattern),
+                Property.address.ilike(search_pattern)
+            ]
+            query = query.join(Property).filter(or_(*conditions))
             
 
         if min_price is not None:
@@ -91,52 +91,81 @@ def index():
 @app.route("/dashboard", methods=["GET", "POST"])
 @login_required
 def dashboard():
-    if request.method == "POST":
-        if request.form.get("property_id") == None:
-            id = request.form.get("id_booking")
-            delete_booking(id)
-        else:
-            delete_property(request.form.get("property_id"))
-
     user_info = google.get("/oauth2/v2/userinfo").json()
     email = user_info["email"]
+
+    if request.method == "POST":
+        if request.form.get("property_id"):
+            delete_property(request.form.get("property_id"))
+        elif request.form.get("id_booking"):
+            delete_booking(request.form.get("id_booking"))
+        return redirect(url_for("dashboard"))
+
     with SessionLocal() as session:
-        my_props = session.query(Property).filter_by(owner_email=email).all()
-        return render_template("dashboard.html", properties=my_props)
+        my_properties = session.query(Property).filter_by(owner_email=email).options(
+            joinedload(Property.units).joinedload(Unit.bookings).joinedload(Booking.guest)
+        ).all()
 
-        
+        my_trips = session.query(Booking).join(Guest).filter(Guest.contact == email).options(
+            joinedload(Booking.unit).joinedload(Unit.property)
+        ).all()
 
+        return render_template(
+            "dashboard.html", 
+            properties=my_properties, 
+            my_trips=my_trips,
+            user_email=email
+        )
+    
 @app.route("/book/<int:unit_id>", methods=["GET", "POST"])
+@login_required
 def book(unit_id):
+    user_info = google.get("/oauth2/v2/userinfo").json()
+    email = user_info["email"]
+
     with SessionLocal() as session:
         unit = session.query(Unit).options(joinedload(Unit.bookings)).get(unit_id)
+        if not unit:
+            return "Объект не найден", 404
+
+        booked_dates = []
+        for b in unit.bookings:
+            booked_dates.append({
+                "from": b.check_in.strftime("%Y-%m-%d"),
+                "to": b.check_out.strftime("%Y-%m-%d")
+            })
+            
         free_slots = get_free_slots(unit.bookings)
 
     if request.method == "POST":
         name = request.form.get("name")
         surname = request.form.get("surname")
-        contact = request.form.get("contact")
         check_in_str = request.form.get("check_in")
         check_out_str = request.form.get("check_out")
-
-        if not all([name, surname, contact, check_in_str, check_out_str]):
-            return "Все поля обязательны для заполнения!", 400
-
-        check_in = datetime.strptime(check_in_str, "%Y-%m-%d").date()
-        check_out = datetime.strptime(check_out_str, "%Y-%m-%d").date()
+        
+        try:
+            check_in = datetime.strptime(check_in_str, "%Y-%m-%d").date()
+            check_out = datetime.strptime(check_out_str, "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            return "Некорректный формат дат", 400
 
         if check_in >= check_out:
             return "Дата выезда должна быть позже даты заезда", 400
-
-        guest = add_guest(name, surname, contact)
+        guest = add_guest(name, surname, email)
         booking = add_booking(guest.id, unit_id, check_in, check_out)
         
         if booking == 0:
-            return "Выбранные даты заняты", 400
+            return "Выбранные даты уже заняты", 400
             
-        return redirect("/")
+        return redirect(url_for("dashboard"))
 
-    return render_template("booking.html", units=[unit], free_slots=free_slots)
+    return render_template(
+        "booking.html", 
+        unit=unit, 
+        free_slots=free_slots, 
+        booked_dates=booked_dates,
+        user_info=user_info
+    )
 
 @app.route("/add_property", methods=["GET", "POST"])
 @login_required
@@ -211,3 +240,6 @@ def page_not_found(error):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+
+    

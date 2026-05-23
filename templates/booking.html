@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<!-- Стили и скрипты Flatpickr -->
+<!-- Подключение Flatpickr -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
@@ -21,11 +21,6 @@
                 </div>
             </div>
             
-            <div class="flex flex-col">
-                <input type="tel" name="contact" id="contact" placeholder="Телефон для связи" class="w-full p-4 rounded-2xl border border-gray-200 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                <span class="text-red-500 text-xs mt-1 ml-2 hidden" id="error-contact">Введите номер телефона</span>
-            </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                 <div class="flex flex-col">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 ml-2">Заезд</label>
@@ -44,23 +39,25 @@
             </button>
         </form>
 
-        <!-- Свободные слоты -->
+        {% if free_slots %}
         <div class="mt-12 pt-10 border-t border-gray-200/60">
-            <h4 class="text-sm font-extrabold text-gray-900 uppercase tracking-wider mb-6">Доступные даты</h4>
+            <h4 class="text-sm font-extrabold text-gray-900 uppercase tracking-wider mb-6">Доступные окна</h4>
             <ul class="flex flex-wrap gap-3">
                 {% for start, end in free_slots %}
                     <li class="px-3 py-1 bg-green-50 text-green-700 rounded-lg border border-green-100 text-xs font-medium">
-                        {{ start.strftime('%d.%m') }}{% if start != end %} <span class="mx-1">→</span> {{ end.strftime('%d.%m') }}{% endif %}
+                        {{ start.strftime('%d.%m') }} — {{ end.strftime('%d.%m') }}
                     </li>
                 {% endfor %}
             </ul>
         </div>
+        {% endif %}
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const bookedDates = {{ booked_dates | tojson | safe if booked_dates else '[]' }};
+    // Получаем данные из Flask (список объектов {from: "...", to: "..."})
+    const bookedDates = {{ booked_dates | tojson | safe }};
 
     const checkinPicker = flatpickr("#check_in", {
         locale: "ru",
@@ -69,21 +66,29 @@ document.addEventListener('DOMContentLoaded', function() {
         disable: bookedDates,
         onChange: function(selectedDates, dateStr) {
             hideError('check_in');
+            
+            // Устанавливаем минимальную дату выезда (день после заезда)
             const minOut = new Date(selectedDates[0]);
             minOut.setDate(minOut.getDate() + 1);
             checkoutPicker.set('minDate', minOut);
 
+            // Логика: не даем забронировать "сквозь" существующее бронирование
             let nextBookedDate = null;
             const selectedTime = selectedDates[0].getTime();
-            const sortedBooked = bookedDates.map(d => new Date(d).getTime()).sort((a, b) => a - b);
             
-            for (let time of sortedBooked) {
-                if (time >= selectedTime) {
-                    nextBookedDate = new Date(time);
+            // Превращаем даты брони в массив объектов Date и сортируем
+            const startDates = bookedDates.map(range => new Date(range.from).getTime()).sort((a, b) => a - b);
+            
+            for (let startTime of startDates) {
+                if (startTime > selectedTime) {
+                    nextBookedDate = new Date(startTime);
                     break;
                 }
             }
+            // Ограничиваем дату выезда ближайшим бронированием
             checkoutPicker.set('maxDate', nextBookedDate);
+            
+            // Автоматически открываем выбор даты выезда
             setTimeout(() => checkoutPicker.open(), 100);
         }
     });
@@ -96,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         onChange: () => hideError('check_out')
     });
 
+    // Валидация формы
     const form = document.getElementById('bookingForm');
     
     function showError(id) {
@@ -108,16 +114,18 @@ document.addEventListener('DOMContentLoaded', function() {
     function hideError(id) {
         const input = document.getElementById(id);
         const error = document.getElementById('error-' + id);
-        input.classList.remove('border-red-500', 'bg-red-50');
-        error.classList.add('hidden');
+        if (input && error) {
+            input.classList.remove('border-red-500', 'bg-red-50');
+            error.classList.add('hidden');
+        }
     }
 
     ['name', 'surname', 'contact'].forEach(id => {
         document.getElementById(id).addEventListener('input', () => hideError(id));
     });
+
     form.addEventListener('submit', function(e) {
         let isValid = true;
-
         const fields = [
             { id: 'name', min: 2 },
             { id: 'surname', min: 1 },
@@ -128,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fields.forEach(field => {
             const el = document.getElementById(field.id);
-            if (el.value.length < field.min) {
+            if (!el.value || el.value.length < field.min) {
                 showError(field.id);
                 isValid = false;
             } else {
